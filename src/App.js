@@ -1,3 +1,4 @@
+// root component is app.js - everything starts here
 // renders the child components (chatwindow, messageinput, messagelist)
 // importing the react to use JSX and CSS styles
 import React, { useState, useRef, useEffect } from "react";
@@ -16,26 +17,38 @@ function App() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!inputValue.trim()) return;
+  const handleSend = async () => {
+  if (!inputValue.trim()) return;
 
-    // Add user message
-    const newMessage = {
-      id: Date.now(),
-      sender: "You",
-      text: inputValue.trim(),
-    };
-    setMessages((prev) => [...prev, newMessage]);
-    setInputValue("");
-
-    // Optional: Add a bot reply after 1 second
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now(), sender: "Bot", text: "Nice! Tell me more 😄" },
-      ]);
-    }, 1000);
+  const newMessage = {
+    id: Date.now(),
+    sender: "You",
+    text: inputValue.trim(),
   };
+
+  setMessages((prev) => [...prev, newMessage]);
+  setInputValue("");
+
+  try {
+    // Send message to backend
+    const response = await fetch("http://localhost:5000/api/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: inputValue }),
+    });
+
+    const data = await response.json();
+
+    // Add bot reply from backend
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), sender: "Bot", text: data.reply },
+    ]);
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
 
   // Allows the user to press the Enter key to send the message instead of clicking the button
   const handleKeyDown = (e) => {
@@ -82,5 +95,4 @@ function App() {
 // The input box lets users type messages; 
 // onChange updates the input state; 
 // onKeyDown sends on Enter; and the button calls handleSend() when clicked.
-
 export default App; // Makes this component available to index.js (the true entry point)

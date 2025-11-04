@@ -22,34 +22,48 @@ const handleSend = async () => {
     id: Date.now(),
     sender: "You",
     text: inputValue.trim(),
-    time: timeNow, // ✅ add timestamp
+    time: timeNow, // add timestamp
   };
 
   setMessages((prev) => [...prev, newMessage]);
   setInputValue("");
 
-  try {
-    const response = await fetch("http://localhost:5000/api/message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: inputValue }),
-    });
+  setIsTyping(true);
 
-    const data = await response.json();
+try {
+    // Simulate typing delay before sending bot response
+setTimeout(async () => {
+  const response = await fetch("http://localhost:5000/api/message", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: inputValue }),
+  });
 
-    // Bot reply
-    const botMessage = {
-      id: Date.now(),
-      sender: "Bot",
-      text: data.reply,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), // ✅ add timestamp
-    };
+  const data = await response.json();
 
-    setMessages((prev) => [...prev, botMessage]);
+  const botMessage = {
+    id: Date.now(),
+    sender: "Bot",
+    text: data.reply,
+    time: new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }), // ✅ fixed timestamp format
+  };
+
+  setIsTyping(false);
+  setMessages((prev) => [...prev, botMessage]);
+}, 1000);
+ // 1 second delay
   } catch (error) {
     console.error("Error:", error);
+    setIsTyping(false);
   }
 };
+
+//track whether the bot is currently "typing"
+const [isTyping, setIsTyping] = useState(false);
+
 
   // Allows the user to press the Enter key to send the message instead of clicking the button
   const handleKeyDown = (e) => {
@@ -69,6 +83,11 @@ const handleSend = async () => {
       <div className="chat-header">WeChat</div> 
       <div className="chat-window">
         <MessageList messages={messages} />
+        {isTyping && (
+          <div className="typing-indicator">
+            <span>🤖 Bot is typing...</span>
+          </div>
+        )}
       </div>
 
       <div className="input-area">

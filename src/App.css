@@ -132,3 +132,23 @@ body {
   text-align: right;
   margin-top: 4px;
 }
+
+.typing-indicator {
+  font-style: italic;
+  color: gray;
+  font-size: 0.9rem;
+  margin: 6px 12px;
+  text-align: left;
+}
+
+.typing-indicator::after {
+  content: " ";
+  animation: dots 1.5s steps(3, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: " "; }
+  40% { content: "."; }
+  60% { content: ".."; }
+  80%, 100% { content: "..."; }
+}

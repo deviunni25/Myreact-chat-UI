@@ -6,7 +6,7 @@ import "../App.css"; // for styles
 function ChatWindow({ messages, inputValue, onInputChange, onSend, onEnter }) {
   return (
     <div className="chat-container">
-      <div className="chat-header">💬 Simple Chat</div>
+      <div className="chat-header">WeChat</div>
 
       {/* Message list */}
       <MessageList messages={messages} />

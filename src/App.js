@@ -3,34 +3,32 @@
 // importing the react to use JSX and CSS styles
 import React, { useState, useRef, useEffect } from "react";
 import "./App.css";
+import MessageList from "./components/MessageList";
 
 // Defining the app component(main component)
+//state management
 function App() {
   const [messages, setMessages] = useState([
     { id: 1, sender: "Bot", text: "Hey there 👋 How are you today?" },
   ]);
   const [inputValue, setInputValue] = useState("");
-  const messagesEndRef = useRef(null);
 
-  // Auto-scroll to the bottom when a new message appears
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const handleSend = async () => {
+const handleSend = async () => {
   if (!inputValue.trim()) return;
+
+  const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   const newMessage = {
     id: Date.now(),
     sender: "You",
     text: inputValue.trim(),
+    time: timeNow, // ✅ add timestamp
   };
 
   setMessages((prev) => [...prev, newMessage]);
   setInputValue("");
 
   try {
-    // Send message to backend
     const response = await fetch("http://localhost:5000/api/message", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -39,16 +37,19 @@ function App() {
 
     const data = await response.json();
 
-    // Add bot reply from backend
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), sender: "Bot", text: data.reply },
-    ]);
+    // Bot reply
+    const botMessage = {
+      id: Date.now(),
+      sender: "Bot",
+      text: data.reply,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), // ✅ add timestamp
+    };
+
+    setMessages((prev) => [...prev, botMessage]);
   } catch (error) {
     console.error("Error:", error);
   }
 };
-
 
   // Allows the user to press the Enter key to send the message instead of clicking the button
   const handleKeyDown = (e) => {
@@ -65,18 +66,9 @@ function App() {
     // displays sender name and the message
     // Renders the message list and an empty div at the bottom — the scroll target for useRefnpm 
     <div className="chat-container">
-      <div className="chat-header">💬 Simple Chat</div> 
+      <div className="chat-header">WeChat</div> 
       <div className="chat-window">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`message ${msg.sender === "You" ? "user" : "bot"}`}
-          >
-            <span className="sender">{msg.sender}: </span>
-            <span>{msg.text}</span>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
+        <MessageList messages={messages} />
       </div>
 
       <div className="input-area">

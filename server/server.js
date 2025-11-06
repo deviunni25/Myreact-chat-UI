@@ -10,7 +10,7 @@ app.use(express.json());
 app.post("/api/message", (req, res) => {
   const userMessage = req.body.message;
 
-  // Simple bot reply logic
+  // bot reply logic
   let reply = "I'm just a simple bot 😅";
   if (userMessage.toLowerCase().includes("hello")) {
     reply = "Hey there! 👋";
